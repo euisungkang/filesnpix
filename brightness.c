@@ -3,6 +3,10 @@
 
 void open_file(FILE **img, char *filename);
 
+/*
+#define T Pnmrdr_T
+typedef struct T *T;
+*/
 int main (int argc, char *argv[])
 {
     if (argc != 2) {
@@ -23,7 +27,7 @@ int main (int argc, char *argv[])
         printf("%s\n", "file has not been opened");
     }
 
-    Pnmrdr_new (FILE *fp)
+    Pnmrdr_new(img);
 
     fclose(img);
 }
