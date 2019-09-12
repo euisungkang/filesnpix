@@ -24,7 +24,7 @@ EXECUTABLES = brightness simlines
 #
 # Add your own .h files to the right side of the assingment below.
 
-INCLUDES = 
+INCLUDES = sentence.h
 
 # Do all C compies with gcc (at home you could try clang)
 CC = gcc
@@ -89,4 +89,5 @@ brightness: brightness.o
 
 simlines: simlines.o readaline.o
 	$(CC) $(LDFLAGS) -o simlines  simlines.o readaline.o $(LDLIBS)
+
 

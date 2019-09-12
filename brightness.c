@@ -16,6 +16,7 @@ Last Modified: 09/09/2019
 #include <pnmrdr.h>
 
 //Function Prototypes
+void open_file(FILE **img, char *filename);
 double average_brightness(void *);
 
 int main (int argc, char *argv[])
@@ -45,6 +46,10 @@ int main (int argc, char *argv[])
     }
 }
 
+void open_file(FILE **img, char *filename) {
+    *img = fopen(filename, "r");
+}
+
 double average_brightness(void *img) {
     Pnmrdr_mapdata data = Pnmrdr_data(img);
     double pixelResult = 0;
@@ -55,6 +60,7 @@ double average_brightness(void *img) {
             printf("%f\n", pixelResult);
         }
     }
+    //printf("%u\n", data.height * data.width);
     return pixelResult / (data.height * data.width);
 }
 
