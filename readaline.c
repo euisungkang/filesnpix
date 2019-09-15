@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <setjmp.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 #include <readaline.h>
 #include <assert.h>
 
@@ -17,31 +19,32 @@ size_t readaline(FILE *inputfd, char **datapp) {
     int Allocation_handled = 1;
 
     if ((inputfd == NULL) | (datapp == NULL))
-        Allocation_handled = 0;
+        Allocation_handled = 0; 
 
-    char *sentence = (char *) malloc(MAX_SENTENCE_LENGTH);
+    char *line = (char *) malloc(MAX_SENTENCE_LENGTH);
 
-    if (fgets(sentence, MAX_SENTENCE_LENGTH, inputfd) != NULL) {
+    char buffer = '$';
 
-        /*
-        int sizeOfSentence = sizeof(*sentence);
-        printf("%d\n", sizeOfSentence);
-        */
+    do {
+        buffer = fgetc(inputfd);
+        line = strcat(line, &buffer);
+    } while ((buffer != EOF) && (buffer != '\n'));
+
+    if ((buffer != EOF) && (buffer != '\n') && (ferror(inputfd))) {
 
         if (*datapp == NULL)
             Allocation_handled = 0;
         else
-            *datapp = sentence;     
+            *datapp = line;     
 
-        //printf("Inside readaline: %s\n", *datapp);
+        printf("Inside readaline: %s\n", *datapp);
 
-        sentence = NULL;
+        line = NULL;
 
-        return MAX_SENTENCE_LENGTH;
+        return strlen(*datapp);
 
-    } else if (feof(inputfd)) {
+    } else if (buffer == EOF) {
         *datapp = NULL;
-
     } else if (ferror(inputfd)) {
         Allocation_handled = 0;
         raise_exception(Allocation_handled);

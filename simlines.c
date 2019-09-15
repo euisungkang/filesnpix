@@ -1,15 +1,20 @@
 #include <stdio.h>
 #include <table.h>
 #include <string.h>
+#include <stdlib.h>
+#include <list.h>
 #include "sentence.h"
 #include "atom.h"
 #include "readaline.h"
 
 //Function Prototypes
-void open_file(FILE **file, char *filename);
-void hash_file(FILE *file, void **table, char *filename);
-int find_matches(void *);
-void display_matches();
+void open_file(FILE **, char *);
+void hash_file(FILE *, Table_T *, char *);
+//int find_matches(Table_T);
+//void display_matches(const void *key, void **value, void *cl);
+//void print_sentence(void **, void*);
+void free_table(Table_T *);
+static void free_list(const void *key, void **value, void *cl);
 
 int main (int argc, char *argv[]) {
 
@@ -21,7 +26,7 @@ int main (int argc, char *argv[]) {
 
     //File pointer to store opened file, and initialize sentence table
     FILE *file;
-    void *sentenceTable = Table_new(10, NULL, NULL);
+    Table_T sentenceTable = Table_new(10, NULL, NULL);
 
     //Open each file and insert all lines into table
     for (int i = 1; i < argc; i++) {
@@ -29,20 +34,25 @@ int main (int argc, char *argv[]) {
         hash_file(file, &sentenceTable, argv[i]);
     }
 
-    printf("%d\n", find_matches(sentenceTable));
+    //find_matches(sentenceTable);
+/*
+    free_table(&sentenceTable);
+    sentenceTable = NULL;
+*/
+    //printf("%d\n", find_matches(sentenceTable));
 
     return 0;
 }
 
-void hash_file(FILE *file, void **table, char *filename) {
+void hash_file(FILE *file, Table_T *table, char *filename) {
 
     int lineCount = 1;
-    char *tempSentence;
+    char *tempSentence = "$";
 
     while(readaline(file, &tempSentence) != 0) {
 
         //printf("Line Count: %u\n", lineCount);
-        //printf("\nValue of tempSentence: %s", tempSentence);
+        printf("\nValue of tempSentence: %s", tempSentence);
 
         struct Sentence *s = Sentence_new(tempSentence, filename, lineCount++);
 
@@ -51,45 +61,72 @@ void hash_file(FILE *file, void **table, char *filename) {
 
         const char *sentenceAtom = Atom_new(key, strlen(key));
 
-        struct Sentence *replaced = Table_put(*table, sentenceAtom, s);
+        void *doesBucketExist = Table_get(*table, sentenceAtom);
 
-        if (strlen(s -> cleanedSentence) == 10) {
-            //struct Sentence *buffer = Table_get(*table, sentenceAtom);
-            if (replaced != NULL) {
-                printf("This is from get: %s", replaced -> cleanedSentence);
-                printf("This is from get: %s\n", replaced -> filename);
-                printf("This is from get: %u\n", replaced -> lineNumber);
-            }
-            /*
-            buffer = Table_get(*table, sentenceAtom);
-            if (buffer != NULL) {
-                printf("This is from get: %s", buffer -> cleanedSentence);
-                printf("This is from get: %s\n", buffer -> filename);
-                printf("This is from get: %u\n", buffer -> lineNumber);
-            }
-            */
+        if (doesBucketExist == NULL) {
+            List_T *sentenceList = (List_T *) malloc(sizeof(List_T));
+            *sentenceList = List_push(NULL, s);
+            Table_put(*table, sentenceAtom, sentenceList);
+            printf("%d\n", List_length(*sentenceList));
         }
-
-        free(tempSentence);
-
-    }    
-
-    printf("Table length is: %d\n", Table_length(*table));
-/*
-    const char *tempAtom = Atom_new("co,m,p,40\n", 10);
-
-    */
+        else {
+            List_T *returnedList = doesBucketExist;
+            *returnedList = List_push(*returnedList, s);
+            Table_put(*table, sentenceAtom, returnedList);
+            printf("%d\n", List_length(*returnedList));
+        }
+    }
+    //sfree(tempSentence);
+    printf("\nTable length is: %d\n", Table_length(*table));
 }
-
-
-int find_matches(void *sentenceTable) {
-    sentenceTable = sentenceTable;
+/*
+int find_matches(Table_T sentenceTable) {
+    Table_map(sentenceTable, display_matches, NULL);
     return 0;
 }
 
-void display_matches() {
-
+void display_matches(const void *key, void **value, void *cl) {
+    if (List_length(*value) > 1) {
+        const char *sharedKey = key;
+        printf("%s\n", sharedKey);
+        List_map(*value, print_sentence, NULL);
+    }
+    cl = cl;
 }
+
+void print_sentence(void **value, void *cl) {
+    char *format[20];
+    for (int i = 0; i < strlen(*value -> filename) - 2; i++) {
+        format[i] = *value -> filename[i];
+    }
+
+
+    int digitsOfInteger = floor(log10(*value -> lineNumber) + 1)
+    char *intToString[digitsOfInteger];
+    sprintf(intToString, "%d", *value -> lineNumber);
+
+    int count = 0;
+    for (int i = 19 - digitsOfInteger; i < 20; i++) {
+
+        format[i] = intToString[count++];
+    }
+    //printf("%s\n", *value -> filename);
+}
+
+*/
+void free_table(Table_T *table) {
+    Table_map(*table, free_list, NULL);
+    Table_free(table);
+}
+
+static void free_list(const void *key, void **value, void *cl) {
+    cl = cl;
+    key = key;
+    List_T tempList = *value;
+    List_map(tempList, Sentence_free, NULL);
+    List_free(&tempList);
+}
+
 
 void open_file(FILE **file, char *filename) {
     *file = fopen(filename, "r");
