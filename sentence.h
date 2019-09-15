@@ -31,7 +31,8 @@ struct Sentence *Sentence_new(char *line, char *name, unsigned int lineNumber) {
 
 void Sentence_free(void **ptr, void *cl) {
     (void) cl;
-    if ((ptr == NULL) | (*ptr == NULL))
+
+    if (*ptr == NULL)
         return;
 
     printf("%p\n", *ptr);

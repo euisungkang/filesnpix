@@ -23,38 +23,49 @@ size_t readaline(FILE *inputfd, char **datapp) {
 
     char *line = (char *) malloc(MAX_SENTENCE_LENGTH);
 
-    char buffer = '$';
+    if (line == NULL)
+        Allocation_handled = 0;
 
-    do {
-        buffer = fgetc(inputfd);
-        line = strcat(line, &buffer);
-    } while ((buffer != EOF) && (buffer != '\n'));
+    char buffer = fgetc(inputfd);
+    //printf("%c\n", buffer);
 
-    if ((buffer != EOF) && (buffer != '\n') && (ferror(inputfd))) {
+    if (buffer == EOF) {
+        line = NULL;
+        return 0;
 
-        if (*datapp == NULL)
+    } else if (buffer != '\n') {
+
+        line[0] = buffer;
+
+        int indexcount = 1;
+        do {
+            buffer = fgetc(inputfd);
+            //printf("%c\n", buffer);
+            line[indexcount++] = buffer;
+        } while (buffer != '\n');
+            //*datapp[indexcount] = '\n';
+
+        printf("%s\n", line);
+
+        if (ferror(inputfd)) {
             Allocation_handled = 0;
-        else
-            *datapp = line;     
+            raise_exception(Allocation_handled);
+            printf("readaline: input line too long\n");
+            raise_exception(Allocation_handled);
+            exit(4);
+        }    
+
+        *datapp = line;
 
         printf("Inside readaline: %s\n", *datapp);
 
         line = NULL;
 
-        return strlen(*datapp);
-
-    } else if (buffer == EOF) {
-        *datapp = NULL;
-    } else if (ferror(inputfd)) {
-        Allocation_handled = 0;
-        raise_exception(Allocation_handled);
-        printf("readaline: input line too long\n");
-        exit(4);
+        //printf("%ld\n", strlen(*datapp));
+        return strlen(*datapp); 
+    } else {
+        return -1;
     }
-
-    raise_exception(Allocation_handled);
-    
-    return 0;
 }
 
 void raise_exception(int Allocation_handled) {

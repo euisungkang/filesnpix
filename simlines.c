@@ -35,10 +35,10 @@ int main (int argc, char *argv[]) {
     }
 
     //find_matches(sentenceTable);
-/*
-    free_table(&sentenceTable);
-    sentenceTable = NULL;
-*/
+
+    //free_table(&sentenceTable);
+    //sentenceTable = NULL;
+
     //printf("%d\n", find_matches(sentenceTable));
 
     return 0;
@@ -47,36 +47,43 @@ int main (int argc, char *argv[]) {
 void hash_file(FILE *file, Table_T *table, char *filename) {
 
     int lineCount = 1;
-    char *tempSentence = "$";
+    char *tempSentence = "";
+    int fileReadSuccess = 0;
+    
+    do {
+        fileReadSuccess = readaline(file, &tempSentence);
 
-    while(readaline(file, &tempSentence) != 0) {
+        if ((fileReadSuccess != -1) && (fileReadSuccess != 0)) {
 
-        //printf("Line Count: %u\n", lineCount);
-        printf("\nValue of tempSentence: %s", tempSentence);
+            //printf("Line Count: %u\n", lineCount);
+            //printf("\nValue of tempSentence: %s", tempSentence);
 
-        struct Sentence *s = Sentence_new(tempSentence, filename, lineCount++);
+            struct Sentence *s = Sentence_new(tempSentence, filename, lineCount++);
 
-        char *key = s -> cleanedSentence;
-        printf("\nThis is key: %s", key);
+            char *key = s -> cleanedSentence;
+            //printf("\nThis is key: %s", key);
 
-        const char *sentenceAtom = Atom_new(key, strlen(key));
+            const char *sentenceAtom = Atom_new(key, strlen(key));
 
-        void *doesBucketExist = Table_get(*table, sentenceAtom);
+            void *doesBucketExist = Table_get(*table, sentenceAtom);
 
-        if (doesBucketExist == NULL) {
-            List_T *sentenceList = (List_T *) malloc(sizeof(List_T));
-            *sentenceList = List_push(NULL, s);
-            Table_put(*table, sentenceAtom, sentenceList);
-            printf("%d\n", List_length(*sentenceList));
+            if (doesBucketExist == NULL) {
+                List_T *sentenceList = (List_T *) malloc(sizeof(List_T));
+                *sentenceList = List_push(NULL, s);
+                Table_put(*table, sentenceAtom, sentenceList);
+                //printf("%d\n", List_length(*sentenceList));
+            }
+            else {
+                List_T *returnedList = doesBucketExist;
+                *returnedList = List_push(*returnedList, s);
+                Table_put(*table, sentenceAtom, returnedList);
+                //printf("%d\n", List_length(*returnedList));
+            }
         }
-        else {
-            List_T *returnedList = doesBucketExist;
-            *returnedList = List_push(*returnedList, s);
-            Table_put(*table, sentenceAtom, returnedList);
-            printf("%d\n", List_length(*returnedList));
-        }
-    }
-    //sfree(tempSentence);
+        //free(tempSentence);
+    } while(fileReadSuccess != 0);
+
+    
     printf("\nTable length is: %d\n", Table_length(*table));
 }
 /*
@@ -116,15 +123,20 @@ void print_sentence(void **value, void *cl) {
 */
 void free_table(Table_T *table) {
     Table_map(*table, free_list, NULL);
+    printf("%d\n",Table_length(*table));
     Table_free(table);
+    //printf("%d\n",Table_length(*table));
 }
 
 static void free_list(const void *key, void **value, void *cl) {
-    cl = cl;
-    key = key;
-    List_T tempList = *value;
+    (void) cl;
+    (void) key;
+    List_T tempList = (List_T) *value;
     List_map(tempList, Sentence_free, NULL);
+    //printf("%d\n",List_length(tempList));
     List_free(&tempList);
+    free(tempList);
+    //printf("%d\n",List_length(tempList));
 }
 
 
