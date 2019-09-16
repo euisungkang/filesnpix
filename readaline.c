@@ -9,9 +9,10 @@
 //Function Prototypes
 size_t readaline(FILE *inputfd, char **datapp);
 void raise_exception(int);
+int expand_max_size(char **);
 
 //Constant Variables
-const unsigned int MAX_SENTENCE_LENGTH = 200;
+const unsigned int DEFAULT_SENTENCE_LENGTH = 100;
 
 //Returns number of bytes in a sentence
 size_t readaline(FILE *inputfd, char **datapp) {
@@ -21,7 +22,8 @@ size_t readaline(FILE *inputfd, char **datapp) {
     if ((inputfd == NULL) | (datapp == NULL))
         Allocation_handled = 0; 
 
-    char *line = (char *) calloc(MAX_SENTENCE_LENGTH, sizeof(char)); 
+    char *line = (char *) calloc(DEFAULT_SENTENCE_LENGTH, sizeof(char)); 
+    int maxLineLength = DEFAULT_SENTENCE_LENGTH;
 
     if (line == NULL)
         Allocation_handled = 0;
@@ -32,7 +34,6 @@ size_t readaline(FILE *inputfd, char **datapp) {
         free(line);
         line = NULL;
         return 0;
-
     } else if (buffer != '\n') {
 
         line[0] = buffer;
@@ -41,7 +42,9 @@ size_t readaline(FILE *inputfd, char **datapp) {
         do {
             buffer = fgetc(inputfd);
             line[indexcount++] = buffer;
-        } while (buffer != '\n');
+            if ((int) strlen(line) > maxLineLength - 1)
+                maxLineLength = expand_max_size(&line);
+        } while (buffer != '\n' && buffer != EOF);
 
         if (ferror(inputfd)) {
             Allocation_handled = 0;
@@ -51,15 +54,28 @@ size_t readaline(FILE *inputfd, char **datapp) {
             exit(4);
         }    
 
-        *datapp = line;
+        if (buffer == EOF)
+            line[strlen(line) - 1] = '\n';
 
-        line = NULL;
+        *datapp = line;
 
         return strlen(*datapp); 
     } else {
         return -1;
     }
 }
+
+
+int expand_max_size(char **s) {
+    char *biggerLine = (char *) calloc(strlen(*s) * 2, sizeof(char));
+
+    strcpy(biggerLine, *s);
+    free(*s);
+    *s = biggerLine;
+
+    return strlen(biggerLine);
+}
+
 
 void raise_exception(int Allocation_handled) {
     jmp_buf Allocate_Failed;

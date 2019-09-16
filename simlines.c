@@ -2,7 +2,6 @@
 #include <table.h>
 #include <string.h>
 #include <stdlib.h>
-#include <list.h>
 #include <seq.h>
 #include <math.h>
 #include "sentence.h"
@@ -83,8 +82,6 @@ int find_matches(Table_T sentenceTable) {
     return 0;
 }
 
-
-
 void display_matches(const void *key, void **value, void *cl) {
     int seqLength = (int) Seq_length((Seq_T) *value);
     if (seqLength > 1) {
@@ -96,30 +93,25 @@ void display_matches(const void *key, void **value, void *cl) {
             
             if (first == true){
                 char *curCleanedString = currentSentence -> cleanedSentence; 
+
+                printf("%lu\n", strlen(curCleanedString));
                 printf("%s", commas_to_space(curCleanedString));
                 first = false; 
             }
 
-            char format[20];
-            int sizeOfFileName = (int) strlen(currentSentence -> filename);
+            char *filename = currentSentence -> filename;
 
-
-            strcpy(format, currentSentence -> filename);
+            //Filename
+            printf("%s", filename);
  
-            int tempLineNum = (currentSentence -> lineNumber); 
-            int digitsOfInteger = floor(log10(tempLineNum)) + 1;
-            
-            int power = digitsOfInteger; 
-            for (int j = 20 - digitsOfInteger; j < 20; j++) {
-                format[j] = (int) (tempLineNum / pow(10, power - 1) + 48);
-                tempLineNum -= (10 * power); 
-                power--; 
-            }
+            int digitsOfInteger = floor(log10(currentSentence -> lineNumber)) + 1;
 
-            for (int j = sizeOfFileName; j < 20 - digitsOfInteger ; j++)
-                format[j] = '-'; 
+            //Dashes
+            int dprint = (int) (20 - strlen(filename) - digitsOfInteger);
+            printf("%.*s", dprint , "--------------------");
 
-            printf("%s\n", format);
+            //Number
+            printf("%u\n", currentSentence -> lineNumber);
         }
     }
     (void) key;
