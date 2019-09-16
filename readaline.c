@@ -8,7 +8,7 @@
 
 //Function Prototypes
 size_t readaline(FILE *inputfd, char **datapp);
-void check_error(FILE *, )
+//void check_error(FILE *, )
 void raise_exception(int);
 int expand_max_size(char **);
 

@@ -95,8 +95,6 @@ void display_matches(const void *key, void **value, void *cl) {
             
             if (first == true){
                 char *curCleanedString = currentSentence -> cleanedSentence; 
-
-                printf("%lu\n", strlen(curCleanedString));
                 printf("%s", commas_to_space(curCleanedString));
                 first = false; 
             }
