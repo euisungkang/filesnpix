@@ -21,6 +21,13 @@ typedef struct Sentence {
 struct Sentence *Sentence_new(char *line, char *name, unsigned int lineNumber) {
     Sentence *s = (Sentence *) malloc(sizeof(Sentence));
     cleanSentence(line);
+
+    /*
+    char *passByValueLine;
+    while (*line)
+        *passByValueLine++ = *line++;
+    */
+
     s -> cleanedSentence = line;
 
     s -> filename = name;

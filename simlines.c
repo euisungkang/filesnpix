@@ -36,8 +36,8 @@ int main (int argc, char *argv[]) {
 
     //find_matches(sentenceTable);
 
-    //free_table(&sentenceTable);
-    //sentenceTable = NULL;
+    free_table(&sentenceTable);
+    sentenceTable = NULL;
 
     //printf("%d\n", find_matches(sentenceTable));
 
@@ -55,10 +55,14 @@ void hash_file(FILE *file, Table_T *table, char *filename) {
 
         if ((fileReadSuccess != -1) && (fileReadSuccess != 0)) {
 
+            char copyOfSentence[strlen(tempSentence)];
+            for (size_t i = 0; i < strlen(tempSentence); i++)
+                copyOfSentence[i] = tempSentence[i];
+
             //printf("Line Count: %u\n", lineCount);
             //printf("\nValue of tempSentence: %s", tempSentence);
 
-            struct Sentence *s = Sentence_new(tempSentence, filename, lineCount++);
+            struct Sentence *s = Sentence_new(copyOfSentence, filename, lineCount++);
 
             char *key = s -> cleanedSentence;
             //printf("\nThis is key: %s", key);
@@ -80,7 +84,7 @@ void hash_file(FILE *file, Table_T *table, char *filename) {
                 //printf("%d\n", List_length(*returnedList));
             }
         }
-        //free(tempSentence);
+        free(tempSentence);
     } while(fileReadSuccess != 0);
 
     
