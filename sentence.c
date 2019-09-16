@@ -1,7 +1,6 @@
 #include "sentence.h"
 
 struct Sentence *Sentence_new(char *line, char *name, unsigned int lineNumber) {
-    printf("%lu\n", sizeof(Sentence));
     Sentence *s = (Sentence *) calloc(1, sizeof(Sentence));
     cleanSentence(line);
 
@@ -16,8 +15,6 @@ struct Sentence *Sentence_new(char *line, char *name, unsigned int lineNumber) {
 void Sentence_free(Sentence *s) {
     if (s == NULL)
         return;
-
-    printf("CleanedSentence in Free: %s\n", s -> cleanedSentence);
     free(s -> cleanedSentence);
     free(s);
 }

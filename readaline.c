@@ -27,12 +27,10 @@ size_t readaline(FILE *inputfd, char **datapp) {
         Allocation_handled = 0;
 
     char buffer = (char) fgetc(inputfd);
-    //printf("%d\n", temp);
 
     if (buffer == EOF) {
         free(line);
         line = NULL;
-        //printf("This is end");
         return 0;
 
     } else if (buffer != '\n') {
@@ -42,12 +40,8 @@ size_t readaline(FILE *inputfd, char **datapp) {
         int indexcount = 1;
         do {
             buffer = fgetc(inputfd);
-            //printf("%c\n", buffer);
             line[indexcount++] = buffer;
         } while (buffer != '\n');
-            //*datapp[indexcount] = '\n';
-
-        printf("%s\n", line);
 
         if (ferror(inputfd)) {
             Allocation_handled = 0;
@@ -59,11 +53,8 @@ size_t readaline(FILE *inputfd, char **datapp) {
 
         *datapp = line;
 
-        //printf("Inside readaline: %s\n", *datapp);
-
         line = NULL;
 
-        //printf("%ld\n", strlen(*datapp));
         return strlen(*datapp); 
     } else {
         return -1;
