@@ -53,7 +53,8 @@ void hash_file(FILE *file, Table_T table, char *filename) {
     do {
         fileReadSuccess = readaline(file, &tempSentence);
 
-        if ((fileReadSuccess != -1) && (fileReadSuccess != 0)) {
+        if ((fileReadSuccess != -2) && (fileReadSuccess != -1) &&
+            (fileReadSuccess != 0)) {
 
             struct Sentence *s = Sentence_new(tempSentence, filename, lineCount++);
 
@@ -72,7 +73,8 @@ void hash_file(FILE *file, Table_T table, char *filename) {
                 Seq_T returnedSeq = doesBucketExist;
                 Seq_addhi(returnedSeq, s);
             }
-        }
+        } else if (fileReadSuccess == -1)
+            lineCount++;
         
     } while(fileReadSuccess != 0);
 }
@@ -108,7 +110,8 @@ void display_matches(const void *key, void **value, void *cl) {
 
             //Dashes
             int dprint = (int) (20 - strlen(filename) - digitsOfInteger);
-            printf("%.*s", dprint , "--------------------");
+            if (dprint > 0) 
+                printf("%.*s", dprint , "--------------------");
 
             //Number
             printf("%u\n", currentSentence -> lineNumber);

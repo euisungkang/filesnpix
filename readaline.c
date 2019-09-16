@@ -8,6 +8,7 @@
 
 //Function Prototypes
 size_t readaline(FILE *inputfd, char **datapp);
+void check_error(FILE *, )
 void raise_exception(int);
 int expand_max_size(char **);
 
@@ -60,9 +61,10 @@ size_t readaline(FILE *inputfd, char **datapp) {
         *datapp = line;
 
         return strlen(*datapp); 
-    } else {
+    } else if (buffer == '\n') {
         return -1;
     }
+    return -2;
 }
 
 
