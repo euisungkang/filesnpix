@@ -1,0 +1,99 @@
+               COMP 40 Lab: Naming brightness functions
+                             (for pairs)
+
+
+Partner's:
+
+Partner 1:  Name_Andrew Crofts    Login acroft01_
+
+Partner 2:  Name_ n/a
+
+Partner 3:  Name______________    Login ____________ (if any)
+
+
+This file goes with part 8 of the first lab.  The idea is to give you
+some practice thinking about the names of functions.  The problem is a
+simple one, so we're going the software equivalent of shooting a fly
+with an elephant gun, but because the problem is so simple, it makes
+it easy to have a short practice session.
+
+Here is the problem:
+
+  - Suggest three different functions that might be useful in
+    implementing `brightness`
+- a function that indexes the brightness of each pixel
+- a function that averages the brightness of each pixel per line
+- a function that loops and calls the previous two functions repeatedly  
+
+  - For each function, suggest three possible names.
+- index_pixels, pixel_brightness, index_line
+- find_average, get_brightness, line_avg_brightness
+- run_brightness, get_brightness, run 
+
+  - For each function, say which name you think is most appropriate
+    and *why*.
+ index_pixels, as it describes the exact act it is doing:
+             indexing each pixel. 
+find_average, as it is more specific than the other two. Its exact
+                   purpose is to average the queue or array or whichever
+                   data structure I use. 
+run_brightness, as it essentially runs the process that finds the
+               average brightness and will eventually return the necessary
+               number.  
+
+
+Function #1:
+
+SEE ABOVE
+
+  Job:
+- a function that indexes the brightness of each pixel
+
+  Candidate names:
+- index_pixels, pixel_brightness, index_line
+  Best name:
+index_pixels,
+  Why the given name is the best:
+
+as it describes the exact act it is doing: indexing each pixel.
+
+
+
+Function #2:
+
+SEE ABOVE 
+
+  Job:
+
+- a function that averages the brightness of each pixel per line,
+         after they have been stored by the previous function
+  Candidate names:
+
+- find_average, get_brightness, line_avg_brightness
+  Best name:
+find_average,
+  Why the given name is the best:
+as it is more specific than the other two. Its exact purpose is
+    to average the queue or array or whichever data structure I use.
+
+
+
+
+Function #3:
+
+  Job:
+
+- a function that loops and calls the previous two functions
+            repeatedly  
+
+  Candidate names:
+
+- run_brightness, get_brightness, run 
+  Best name:
+run_brightness,
+  Why the given name is the best:
+            It essentially runs the process that finds the average
+    brightness and will eventually return the necessary number. So 
+            the term run seems appropriate. 
+
+

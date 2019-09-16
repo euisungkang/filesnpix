@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <list.h>
+#include <seq.h>
+#include <math.h>
 #include "sentence.h"
 #include "atom.h"
 #include "readaline.h"
@@ -10,9 +12,9 @@
 //Function Prototypes
 void open_file(FILE **, char *);
 void hash_file(FILE *, Table_T *, char *);
-//int find_matches(Table_T);
-//void display_matches(const void *key, void **value, void *cl);
-//void print_sentence(void **, void*);
+int find_matches(Table_T);
+void display_matches(const void *key, void **value, void *cl);
+void print_sentence(void **, void*);
 void free_table(Table_T *);
 static void free_list(const void *key, void **value, void *cl);
 
@@ -72,14 +74,16 @@ void hash_file(FILE *file, Table_T *table, char *filename) {
             void *doesBucketExist = Table_get(*table, sentenceAtom);
 
             if (doesBucketExist == NULL) {
-                List_T *sentenceList = (List_T *) malloc(sizeof(List_T));
-                *sentenceList = List_push(NULL, s);
+                //replace with sequence
+               // Seq_T *sentenceList = (Seq_T *) malloc(sizeof(List_T));
+                Seq_T sentenceList = Seq_new(5); 
+                Seq_addhi(sentenceList, s);
                 Table_put(*table, sentenceAtom, sentenceList);
                 //printf("%d\n", List_length(*sentenceList));
             }
             else {
-                List_T *returnedList = doesBucketExist;
-                *returnedList = List_push(*returnedList, s);
+                Seq_T returnedList = doesBucketExist;
+                Seq_addhi(returnedList, s);
                 Table_put(*table, sentenceAtom, returnedList);
                 //printf("%d\n", List_length(*returnedList));
             }
@@ -87,10 +91,10 @@ void hash_file(FILE *file, Table_T *table, char *filename) {
         free(tempSentence);
     } while(fileReadSuccess != 0);
 
-    
+   
     printf("\nTable length is: %d\n", Table_length(*table));
 }
-/*
+
 int find_matches(Table_T sentenceTable) {
     Table_map(sentenceTable, display_matches, NULL);
     return 0;
@@ -99,32 +103,45 @@ int find_matches(Table_T sentenceTable) {
 void display_matches(const void *key, void **value, void *cl) {
     if (List_length(*value) > 1) {
         const char *sharedKey = key;
-        printf("%s\n", sharedKey);
+        printf("%s\n", sharedKey); 
         List_map(*value, print_sentence, NULL);
     }
     cl = cl;
 }
 
 void print_sentence(void **value, void *cl) {
-    char *format[20];
-    for (int i = 0; i < strlen(*value -> filename) - 2; i++) {
-        format[i] = *value -> filename[i];
+    char *format[20]; 
+    value = value;
+    cl = cl; 
+    int temp1;  
+    for (int i = 0; i < (int)strlen(((Sentence *) value)->filename) - 2; i++) {
+        *(format[i]) = (((Sentence *) value) -> filename)[i];
+        temp1 = i; 
     }
 
-
-    int digitsOfInteger = floor(log10(*value -> lineNumber) + 1)
+    int tempLineNum = ((Sentence *) value) -> lineNumber; 	
+    int digitsOfInteger = floor(log10(tempLineNum + 1));
+    /*
     char *intToString[digitsOfInteger];
-    sprintf(intToString, "%d", *value -> lineNumber);
-
-    int count = 0;
+    sprintf(intToString, "%s", (((Sentence *) value) -> lineNumber));
+    */
+    
+   
+   // int count = 0;
+    int power = digitsOfInteger; 
     for (int i = 19 - digitsOfInteger; i < 20; i++) {
-
-        format[i] = intToString[count++];
+	
+        *(format[i]) = (char)trunc(tempLineNum / (10 * power));
+        power--; 
     }
-    //printf("%s\n", *value -> filename);
+
+    for (int i = temp1; i < 20 - digitsOfInteger ; i++){
+            *(format[i]) = '-'; 
+    }
+    //printf("%s\n", *value -> filename
 }
 
-*/
+
 void free_table(Table_T *table) {
     Table_map(*table, free_list, NULL);
     printf("%d\n",Table_length(*table));
@@ -135,11 +152,14 @@ void free_table(Table_T *table) {
 static void free_list(const void *key, void **value, void *cl) {
     (void) cl;
     (void) key;
-    List_T tempList = (List_T) *value;
-    List_map(tempList, Sentence_free, NULL);
+    Seq_T tempList = (Seq_T) *value;
+    for (int i = Seq_length(tempList); i >= 0; i--){
+        Sentence_free(Seq_get(tempList, i), NULL); 
+    }
+    //List_map(tempList, Sentence_free, NULL);
     //printf("%d\n",List_length(tempList));
-    List_free(&tempList);
-    free(tempList);
+    Seq_free(&tempList);
+    //free(tempList);
     //printf("%d\n",List_length(tempList));
 }
 
