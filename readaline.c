@@ -21,16 +21,18 @@ size_t readaline(FILE *inputfd, char **datapp) {
     if ((inputfd == NULL) | (datapp == NULL))
         Allocation_handled = 0; 
 
-    char *line = (char *) malloc(MAX_SENTENCE_LENGTH);
+    char *line = (char *) calloc(MAX_SENTENCE_LENGTH, sizeof(char)); 
 
     if (line == NULL)
         Allocation_handled = 0;
 
-    char buffer = fgetc(inputfd);
-    //printf("%c\n", buffer);
+    char buffer = (char) fgetc(inputfd);
+    //printf("%d\n", temp);
 
     if (buffer == EOF) {
+        free(line);
         line = NULL;
+        //printf("This is end");
         return 0;
 
     } else if (buffer != '\n') {
@@ -57,7 +59,7 @@ size_t readaline(FILE *inputfd, char **datapp) {
 
         *datapp = line;
 
-        printf("Inside readaline: %s\n", *datapp);
+        //printf("Inside readaline: %s\n", *datapp);
 
         line = NULL;
 

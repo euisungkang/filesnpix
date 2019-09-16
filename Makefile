@@ -87,7 +87,7 @@ clean:
 brightness: brightness.o
 	$(CC) $(LDFLAGS) -o brightness brightness.o $(LDLIBS)
 
-simlines: simlines.o readaline.o
-	$(CC) $(LDFLAGS) -o simlines  simlines.o readaline.o $(LDLIBS)
+simlines: simlines.o readaline.o sentence.o
+	$(CC) $(LDFLAGS) -o simlines  simlines.o readaline.o sentence.o $(LDLIBS)
 
 
