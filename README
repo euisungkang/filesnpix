@@ -1,0 +1,15 @@
+Easton Kang, Andrew Crofts
+Professor Monroe
+Comp-40 hours a week
+09/16/2019
+
+Acknowledgedments: Jessica Wang, James Cameron, Jared Hwang, Byron Zhong,
+                   Colin Murphy
+
+As far as we know, everything has been correctly implemented according
+to the spec.
+
+Hours: Comp 40 hours a week (40): 40, 40; 40: 40
+
+int 40 = 40;
+printf("%d\n", 40);

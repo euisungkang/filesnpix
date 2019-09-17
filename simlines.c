@@ -123,7 +123,7 @@ void display_matches(const void *key, void **value, void *cl)
 
         Seq_T currentSeq = (Seq_T) *value;
 
-        bool printMatch = true;    //Keeps track of printing the matched word once
+        bool printMatch = true; //Keeps track of printing the matched word once
 
         for (int i = 0; i < seqLength; i++) {
             Sentence *currentSentence = (Sentence *) Seq_get(currentSeq, i); 
@@ -141,7 +141,8 @@ void display_matches(const void *key, void **value, void *cl)
             printf("%s", filename);
  
             //Number of digits in line number
-            int digitsOfInteger = floor(log10(currentSentence -> lineNumber)) + 1;
+            int digitsOfInteger = floor(log10(currentSentence -> lineNumber))
+                                        + 1;
 
             //Print dashes '-'
             int dprint = (int) (20 - strlen(filename) - digitsOfInteger);

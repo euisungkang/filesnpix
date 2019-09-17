@@ -26,7 +26,7 @@ int main (int argc, char *argv[])
 {
     //Error message, too many arguments
     if (argc > 2) {
-        fprintf(stderr, "Invalid input files: ./brightness [image file]");
+        fprintf(stderr, "Invalid input files: ./brightness [image file]\n");
         exit(EXIT_FAILURE);
     }
 
@@ -45,11 +45,7 @@ int main (int argc, char *argv[])
         open_file(&img, argv[1]);       //Open file
 
         //Initialize pnmrdr with file stream, display brightness
-        Except_T exception = Pnmrdr_new(img);
-        if (((Except_T) grayscale  == Pnmrdr_Badformat)) {
-            assert(0);
-            exit(EXIT_FAILURE);
-        }
+        grayscale = Pnmrdr_new(img);
 
         printf("%.3f\n", average_brightness(grayscale));
 
@@ -66,7 +62,7 @@ void open_file(FILE **img, char *filename)
 {
     *img = fopen(filename, "r");
     if (!(*img)) {
-        fprintf(stderr, "Error: file could not be opened");
+        fprintf(stderr, "Error: file could not be opened\n");
         exit(EXIT_FAILURE);
     }
 }
@@ -78,9 +74,15 @@ double average_brightness(void *img)
 {
     Pnmrdr_mapdata data = Pnmrdr_data(img);
 
+    //Error if file type is not grayscale .pgm
+    if (data.type != Pnmrdr_gray) {
+        fprintf(stderr, "Error: File is not grayscale .pgm format\n");
+        exit(EXIT_FAILURE);
+    }
+
     //Error if image has no readable pixels
     if (data.height * data.width <= 0) {
-        fprintf(stderr, "Error: Image is empty, 0 readable pixels");
+        fprintf(stderr, "Error: Image is empty, 0 readable pixels\n");
         exit(EXIT_FAILURE);
     }
 
