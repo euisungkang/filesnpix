@@ -17,6 +17,8 @@ void free_table(Table_T *);
 static void free_list(const void *key, void **value, void *cl);
 char *commas_to_space(char *);
 
+const int seqConst = 5; 
+
 int main (int argc, char *argv[]) {
 
     //If user didn't enter any input files
@@ -61,11 +63,12 @@ void hash_file(FILE *file, Table_T table, char *filename) {
             char *key = s -> cleanedSentence;
 
             const char *sentenceAtom = Atom_new(key, strlen(key));
+            printf("(%s)\n", key);
 
             void *doesBucketExist = Table_get(table, sentenceAtom);
 
             if (doesBucketExist == NULL) {
-                Seq_T sentenceSeq = Seq_new(5); 
+                Seq_T sentenceSeq = Seq_new(seqConst); 
                 Seq_addhi(sentenceSeq, s);
                 Table_put(table, sentenceAtom, sentenceSeq);
             }
