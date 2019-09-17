@@ -1,7 +1,21 @@
+/*
+Easton, Andrew
+Professor Monroe
+Comp-40
+09/16/2019
+
+PROJECT: simlines.c
+PURPOSE: Implementation of simlines, primary file of program. Will insert
+         all data into table, and display all matches
+NOTE:    
+
+Last Modified: 09/16/2019
+*/
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <table.h>
 #include <string.h>
-#include <stdlib.h>
 #include <seq.h>
 #include <math.h>
 #include "sentence.h"
@@ -11,14 +25,14 @@
 //Function Prototypes
 void open_file(FILE **, char *);
 void hash_file(FILE *, Table_T, char *);
-int find_matches(Table_T);
+void find_matches(Table_T);
 void display_matches(const void *key, void **value, void *cl);
 void free_table(Table_T *);
-static void free_list(const void *key, void **value, void *cl);
+static void free_seq(const void *key, void **value, void *cl);
 char *commas_to_space(char *);
 
-int main (int argc, char *argv[]) {
-
+int main (int argc, char *argv[])
+{
     //If user didn't enter any input files
     if (argc == 1) {
         fprintf(stderr, "Invalid input file(s)");
@@ -36,84 +50,105 @@ int main (int argc, char *argv[]) {
         fclose(file);
     }
 
+    //Find and display all matches
     find_matches(sentenceTable);
 
+    //Free all memory in heap
     free_table(&sentenceTable);
     sentenceTable = NULL;
 
-    return 0;
+    exit(EXIT_SUCCESS);
 }
 
-void hash_file(FILE *file, Table_T table, char *filename) {
-
+/*
+PURPOSE: Hashes an entire file by line into a given table. Uses atoms as
+         indexes in the table. The table is filled with Hansen's sequences */
+void hash_file(FILE *file, Table_T table, char *filename)
+{
     int lineCount = 1;
-    char *tempSentence = "$";
-    int fileReadSuccess = 0;
+    char *sentence = "$";
+
+    int fileReadSuccess = 0;    //Determines if readaline() was successful
     
+    //Runs until readaline reaches EOF
     do {
-        fileReadSuccess = readaline(file, &tempSentence);
+        fileReadSuccess = readaline(file, &sentence);
 
-        if ((fileReadSuccess != -2) && (fileReadSuccess != -1) &&
-            (fileReadSuccess != 0)) {
+        //0 = EOF, -1 = line with only '\n'
+        if ((fileReadSuccess != 0) && (fileReadSuccess != -1)) {
 
-            struct Sentence *s = Sentence_new(tempSentence, filename, lineCount++);
+            //Initialize sentence struct, see sentence.c | sentence.h
+            struct Sentence *s = Sentence_new(sentence, filename, lineCount++);
 
             char *key = s -> cleanedSentence;
 
             const char *sentenceAtom = Atom_new(key, strlen(key));
 
+            //Table_get returns NULL if a bucket is not initialized
             void *doesBucketExist = Table_get(table, sentenceAtom);
 
             if (doesBucketExist == NULL) {
+
+                //Create new sequence, add to it, and put the seq in table
                 Seq_T sentenceSeq = Seq_new(5); 
                 Seq_addhi(sentenceSeq, s);
                 Table_put(table, sentenceAtom, sentenceSeq);
             }
             else {
+
+                //Edit the seq with the new value
                 Seq_T returnedSeq = doesBucketExist;
                 Seq_addhi(returnedSeq, s);
             }
         } else if (fileReadSuccess == -1)
-            lineCount++;
-        
+            lineCount++;    //If line only contains '\n', just increase count
     } while(fileReadSuccess != 0);
 }
 
-int find_matches(Table_T sentenceTable) {
+/*
+PURPOSE: Iterates and prints all the matches in the table's sequences */
+void find_matches(Table_T sentenceTable)
+{
     Table_map(sentenceTable, display_matches, NULL);
-    return 0;
 }
 
-void display_matches(const void *key, void **value, void *cl) {
+/*
+PURPOSE: Displays all the matches for one bucket/key   */
+void display_matches(const void *key, void **value, void *cl)
+{
     int seqLength = (int) Seq_length((Seq_T) *value);
+
+    //If there are matches, seq length must be > 1
     if (seqLength > 1) {
+
         Seq_T currentSeq = (Seq_T) *value;
 
-        bool first = true; 
-        for (int i = 0; i < seqLength; i++) {
-            Sentence *currentSentence = Seq_get(currentSeq, i); 
-            
-            if (first == true){
-                char *curCleanedString = currentSentence -> cleanedSentence; 
+        bool printMatch = true;    //Keeps track of printing the matched word once
 
-                printf("%lu\n", strlen(curCleanedString));
-                printf("%s", commas_to_space(curCleanedString));
-                first = false; 
+        for (int i = 0; i < seqLength; i++) {
+            Sentence *currentSentence = (Sentence *) Seq_get(currentSeq, i); 
+            
+            //Print matched word/key once.
+            if (printMatch == true) {
+                char *cleanedString = currentSentence -> cleanedSentence; 
+                printf("%s", commas_to_space(cleanedString));
+                printMatch = false; 
             }
 
             char *filename = currentSentence -> filename;
 
-            //Filename
+            //Print filename
             printf("%s", filename);
  
+            //Number of digits in line number
             int digitsOfInteger = floor(log10(currentSentence -> lineNumber)) + 1;
 
-            //Dashes
+            //Print dashes '-'
             int dprint = (int) (20 - strlen(filename) - digitsOfInteger);
             if (dprint > 0) 
-                printf("%.*s", dprint , "--------------------");
+                printf("%.*s", dprint , "                        ");
 
-            //Number
+            //Print line number
             printf("%u\n", currentSentence -> lineNumber);
         }
     }
@@ -121,8 +156,10 @@ void display_matches(const void *key, void **value, void *cl) {
     (void) cl;
 }
 
-char *commas_to_space(char *string) {
-
+/*
+PURPOSE: Changes all commas to spaces in a given string */
+char *commas_to_space(char *string)
+{
     for (size_t i = 0; i < strlen(string); i++)
         if (string[i] == ',') 
             string[i] = ' ';
@@ -130,30 +167,34 @@ char *commas_to_space(char *string) {
     return string;
 }
 
-void free_table(Table_T *table) {
-    Table_map(*table, free_list, NULL);
+/*
+PURPOSE: Frees all malloc memory in a given table   */
+void free_table(Table_T *table)
+{
+    Table_map(*table, free_seq, NULL);
     Table_free(table);
 }
 
-static void free_list(const void *key, void **value, void *cl) {
-    (void) cl;
-    (void) key;
-
+/*
+PURPOSE: Frees all malloc memory in a given sequence */
+static void free_seq(const void *key, void **value, void *cl)
+{
     Seq_T tempList = (Seq_T) *value;
     for (int i = Seq_length(tempList) - 1; i >= 0; i--)
         Sentence_free((Sentence *) Seq_get(tempList, i)); 
     Seq_free(&tempList);
+
+    (void) cl;
+    (void) key;
 }
 
-
-void open_file(FILE **file, char *filename) {
+/*
+PURPOSE: Opens a file, checks for error and exits */
+void open_file(FILE **file, char *filename)
+{
     *file = fopen(filename, "r");
     if (!file) {
         fprintf(stderr, "Error: file could not be opened");
-        exit(4);
+        exit(EXIT_FAILURE);
     }
 }
-
-
-
-

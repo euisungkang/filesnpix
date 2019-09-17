@@ -15,18 +15,19 @@ Last Modified: 09/10/2019
 #include <stdio.h>
 #include <stdlib.h>
 #include <pnmrdr.h>
+#include <setjmp.h>
+#include "except.h"
 
 //Function Prototypes
 void open_file(FILE **img, char *filename);
 double average_brightness(void *);
-
 
 int main (int argc, char *argv[])
 {
     //Error message, too many arguments
     if (argc > 2) {
         fprintf(stderr, "Invalid input files: ./brightness [image file]");
-        return 0;
+        exit(EXIT_FAILURE);
     }
 
     void *grayscale;        //void * to store pnmrdr
@@ -44,37 +45,51 @@ int main (int argc, char *argv[])
         open_file(&img, argv[1]);       //Open file
 
         //Initialize pnmrdr with file stream, display brightness
-        grayscale = Pnmrdr_new(img);
+        Except_T exception = Pnmrdr_new(img);
+        if (((Except_T) grayscale  == Pnmrdr_Badformat)) {
+            assert(0);
+            exit(EXIT_FAILURE);
+        }
+
         printf("%.3f\n", average_brightness(grayscale));
 
         fclose(img);        //Close to avoid mem leak
     }
 
-    return 0;
+    exit(EXIT_SUCCESS);
 }
 
 /*
 PURPOSE: Will open given file and return a pointer to it. Will display error
          message and exit program if file can't be opened       */
-void open_file(FILE **img, char *filename) {
+void open_file(FILE **img, char *filename)
+{
     *img = fopen(filename, "r");
-    if (!img) {
+    if (!(*img)) {
         fprintf(stderr, "Error: file could not be opened");
-        exit(4);
+        exit(EXIT_FAILURE);
     }
 }
 
 /*
 PURPOSE: Returns the average brightness of a given pgm file. Iterates
          every pixel's brightness    */
-double average_brightness(void *img) {
+double average_brightness(void *img)
+{
     Pnmrdr_mapdata data = Pnmrdr_data(img);
-    double pixelResult = 0;
-    for (unsigned int i = 0; i < data.height; i++) {
-        for (unsigned int j = 0; j < data.width; j++) {
-            pixelResult += ((double)Pnmrdr_get(img) / 255);
-        }
+
+    //Error if image has no readable pixels
+    if (data.height * data.width <= 0) {
+        fprintf(stderr, "Error: Image is empty, 0 readable pixels");
+        exit(EXIT_FAILURE);
     }
-    //printf("%u\n", data.height * data.width);
+
+    double pixelResult = 0;
+
+    //Iterate through each pixel and add brightness (0 ~ 1)
+    for (unsigned int i = 0; i < data.height; i++) 
+        for (unsigned int j = 0; j < data.width; j++) 
+            pixelResult += ((double)Pnmrdr_get(img) / 255);
+    
     return pixelResult / (data.height * data.width);
 }
