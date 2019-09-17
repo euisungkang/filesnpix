@@ -20,6 +20,7 @@ Last Modified: 09/10/2019
 void open_file(FILE **img, char *filename);
 double average_brightness(void *);
 
+const int divConst = 255; 
 
 int main (int argc, char *argv[])
 {
@@ -72,9 +73,8 @@ double average_brightness(void *img) {
     double pixelResult = 0;
     for (unsigned int i = 0; i < data.height; i++) {
         for (unsigned int j = 0; j < data.width; j++) {
-            pixelResult += ((double)Pnmrdr_get(img) / 255);
+            pixelResult += ((double)Pnmrdr_get(img) / divConst); 
         }
     }
-    //printf("%u\n", data.height * data.width);
     return pixelResult / (data.height * data.width);
 }
